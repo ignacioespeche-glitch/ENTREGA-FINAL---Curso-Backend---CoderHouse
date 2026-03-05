@@ -35,6 +35,17 @@ const productSchema = new mongoose.Schema(
     thumbnails: {
       type: [String],
       default: []
+    },
+    
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true
+    },
+
+    isPremium: {
+      type: Boolean,
+      default: false
     }
   },
   {

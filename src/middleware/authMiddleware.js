@@ -1,13 +1,34 @@
-export const isAdmin = (req, res, next) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ error: "Acceso denegado: Se requiere rol de Admin" });
-  }
-  next();
-};
+import jwt from "jsonwebtoken";
 
-export const isUser = (req, res, next) => {
-  if (req.user?.role !== "user") {
-    return res.status(403).json({ error: "Acceso denegado: Se requiere rol de Usuario" });
+export const authMiddleware = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({
+        status: "error",
+        message: "No autorizado - Falta token"
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
+        status: "error",
+        message: "Token inválido"
+      });
+    }
+
+    const decoded = jwt.verify(token, "coderSecret"); 
+
+    req.user = decoded;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      status: "error",
+      message: "Token inválido o expirado"
+    });
   }
-  next();
 };

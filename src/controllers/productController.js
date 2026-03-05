@@ -1,17 +1,72 @@
-import productoService from "../services/ProductService.js";
-import ProductoDTO from "../dto/productoDTO.js";
+import { productService } from "../services/ProductService.js";
 
-class ProductoController {
-  async getAll(req, res) {
-    const products = await productoService.getAll();
-    const dtoProducts = products.map(p => new ProductoDTO(p));
-    res.json(dtoProducts);
+class ProductController {
+  async getProducts(req, res) {
+    try {
+      const products = await productService.getProducts();
+      res.status(200).json({ status: "success", payload: products });
+    } catch (error) {
+      res.status(500).json({ status: "error", message: error.message });
+    }
   }
 
-  async create(req, res) {
-    const product = await productoService.create(req.body);
-    res.status(201).json(product);
+  async getProductById(req, res) {
+    try {
+      const { pid } = req.params;
+      const product = await productService.getProductById(pid);
+      res.status(200).json({ status: "success", payload: product });
+    } catch (error) {
+      res.status(404).json({ status: "error", message: error.message });
+    }
+  }
+
+  async createProduct(req, res) {
+    try {
+      const newProduct = await productService.createProduct(
+        req.body,
+        req.user
+      );
+
+      res.status(201).json({
+        status: "success",
+        payload: newProduct
+      });
+    } catch (error) {
+      res.status(400).json({ status: "error", message: error.message });
+    }
+  }
+
+  async updateProduct(req, res) {
+    try {
+      const { pid } = req.params;
+      const updated = await productService.updateProduct(pid, req.body);
+
+      res.status(200).json({
+        status: "success",
+        payload: updated
+      });
+    } catch (error) {
+      res.status(404).json({ status: "error", message: error.message });
+    }
+  }
+
+  async deleteProduct(req, res) {
+    try {
+      const { pid } = req.params;
+
+      const result = await productService.deleteProduct(
+        pid,
+        req.user
+      );
+
+      res.status(200).json({
+        status: "success",
+        message: result.message
+      });
+    } catch (error) {
+      res.status(403).json({ status: "error", message: error.message });
+    }
   }
 }
 
-export default new ProductoController();
+export const productController = new ProductController();
